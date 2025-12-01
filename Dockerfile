@@ -40,7 +40,7 @@ COPY . .
 RUN touch database/database.sqlite \
     && chown -R www-data:www-data database storage bootstrap/cache \
     && chmod -R 775 database storage bootstrap/cache
-
+RUN php artisan migrate --seed --no-interaction
 # ------------------------------
 # 7. Install PHP dependencies
 # ------------------------------
