@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     nginx \
     sqlite3 \
     libsqlite3-dev \
-    supervisor
+    supervisor \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite
@@ -32,9 +33,10 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 # Copy nginx config
 COPY ./deploy/nginx.conf /etc/nginx/sites-available/default
 
-# Expose port (Render sets $PORT, usually 10000)
+# Expose port
 ENV PORT=10000
 EXPOSE 10000
 
-# Start PHP-FPM and nginx
-CMD php-fpm & nginx -g 'daemon off;'
+# Start PHP-FPM and Nginx in foreground using supervisor
+COPY ./deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+CMD ["supervisord", "-n"]
