@@ -40,7 +40,7 @@ COPY . .
 RUN touch database/database.sqlite \
     && chown -R www-data:www-data database storage bootstrap/cache \
     && chmod -R 775 database storage bootstrap/cache
-RUN php artisan migrate --seed --no-interaction
+
 # ------------------------------
 # 7. Install PHP dependencies
 # ------------------------------
@@ -63,6 +63,6 @@ EXPOSE 10000
 COPY ./deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # ------------------------------
-# 11. Start Supervisor (manages php-fpm + nginx)
+# 11. Start migrations/seeders + supervisor at runtime
 # ------------------------------
-CMD ["supervisord", "-n"]
+CMD php artisan migrate --force --seed && supervisord -n
