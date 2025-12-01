@@ -17,24 +17,24 @@ RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy project files
+# Set working directory
 WORKDIR /var/www/html
+
+# Copy project files
 COPY . .
 
-# Install dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravel permissions
+# Set Laravel permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 # Copy nginx config
-COPY ./deploy/nginx.conf /etc/nginx/nginx.conf
+COPY ./deploy/nginx.conf /etc/nginx/sites-available/default
 
-# Use $PORT
+# Expose port (Render sets $PORT, usually 10000)
 ENV PORT=10000
-
-# Expose port (optional, just for documentation)
 EXPOSE 10000
 
-# Start PHP-FPM and nginx in foreground
+# Start PHP-FPM and nginx
 CMD php-fpm & nginx -g 'daemon off;'
