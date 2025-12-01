@@ -15,6 +15,7 @@ Route::post('/login',[AuthController::class,'login']);
 // Public project list
 Route::get('/projects',[ProjectController::class,'index']);
 Route::get('/projects/{id}',[ProjectController::class,'show']);
+Route::get('/projects/slug/{slug}', [ProjectController::class, 'showBySlug']);
 
 // Protected admin routes (middleware: auth:sanctum)
 Route::middleware('auth:sanctum')->group(function(){
