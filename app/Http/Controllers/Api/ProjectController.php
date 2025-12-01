@@ -16,6 +16,13 @@ class ProjectController extends Controller
         $projects = Project::where('is_published', true)->orderBy('created_at','desc')->get();
         return response()->json($projects);
     }
+    
+    public function showBySlug($slug)
+    {
+        $project = Project::where('slug', $slug)->firstOrFail();
+        return response()->json($project);
+    }
+
 
     public function adminIndex()
     {
