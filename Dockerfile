@@ -40,7 +40,8 @@ COPY . .
 RUN touch database/database.sqlite \
     && chown -R www-data:www-data database storage bootstrap/cache \
     && chmod -R 775 database storage bootstrap/cache
-
+# Create the storage link
+RUN php artisan storage:link
 # ------------------------------
 # 7. Install PHP dependencies
 # ------------------------------
