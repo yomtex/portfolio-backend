@@ -1,6 +1,8 @@
 FROM php:8.2-fpm
 
-# Install system dependencies
+# ------------------------------
+# 1. Install system dependencies
+# ------------------------------
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -12,31 +14,55 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
+# ------------------------------
+# 2. Install PHP extensions
+# ------------------------------
 RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite
 
-# Install Composer
+# ------------------------------
+# 3. Install Composer
+# ------------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# ------------------------------
+# 4. Set working directory
+# ------------------------------
 WORKDIR /var/www/html
 
-# Copy project files
+# ------------------------------
+# 5. Copy project files
+# ------------------------------
 COPY . .
 
-# Install PHP dependencies
+# ------------------------------
+# 6. Ensure SQLite database exists & proper permissions
+# ------------------------------
+RUN touch database/database.sqlite \
+    && chown -R www-data:www-data database storage bootstrap/cache \
+    && chmod -R 775 database storage bootstrap/cache
+
+# ------------------------------
+# 7. Install PHP dependencies
+# ------------------------------
 RUN composer install --no-dev --optimize-autoloader
 
-# Set Laravel permissions
-RUN chown -R www-data:www-data storage bootstrap/cache
-
-# Copy nginx config
+# ------------------------------
+# 8. Copy nginx config
+# ------------------------------
 COPY ./deploy/nginx.conf /etc/nginx/sites-available/default
 
-# Expose port
+# ------------------------------
+# 9. Set environment port
+# ------------------------------
 ENV PORT=10000
 EXPOSE 10000
 
-# Start PHP-FPM and Nginx in foreground using supervisor
+# ------------------------------
+# 10. Supervisor config
+# ------------------------------
 COPY ./deploy/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# ------------------------------
+# 11. Start Supervisor (manages php-fpm + nginx)
+# ------------------------------
 CMD ["supervisord", "-n"]
