@@ -37,4 +37,4 @@ ENV PORT=10000
 EXPOSE 10000
 
 # Start PHP-FPM and nginx in foreground
-CMD php-fpm & nginx -g 'daemon off;'"
+CMD php-fpm & nginx -g 'daemon off;'
