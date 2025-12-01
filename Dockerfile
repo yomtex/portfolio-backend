@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     nginx \
     sqlite3 \
-    libsqlite3-dev
+    libsqlite3-dev \
+    supervisor
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql pdo_sqlite
@@ -20,14 +21,20 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
 # Laravel permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Nginx config
+# Copy nginx config
 COPY ./deploy/nginx.conf /etc/nginx/nginx.conf
 
-EXPOSE 80
+# Use $PORT
+ENV PORT=10000
 
-CMD service nginx start && php-fpm
+# Expose port (optional, just for documentation)
+EXPOSE 10000
+
+# Start PHP-FPM and nginx in foreground
+CMD sh -c "php-fpm && nginx -g 'daemon off;'"
